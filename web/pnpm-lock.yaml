@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@next/env':
+        specifier: ^16.2.6
+        version: 16.2.6
       google:
         specifier: link:next/font/google
         version: link:next/font/google
