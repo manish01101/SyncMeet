@@ -1,5 +1,12 @@
 "use client";
 
+import { PeerProvider } from "@/app/providers/PeerProvider";
+import RoomClient from "./RoomClient";
+
 export default function RoomPage() {
-  return "room page";
+  return (
+    <PeerProvider>
+      <RoomClient />
+    </PeerProvider>
+  );
 }
