@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
+import { SocketProvider } from "./providers/SocketProvider";
+import { RemoteUserProvider } from "./providers/RemoteUserProvider";
 
 const bricolage = Bricolage_Grotesque({ subsets: ["latin"] });
 
@@ -16,7 +18,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={bricolage.className}>{children}</body>
+      <body className={bricolage.className}>
+        {" "}
+        <SocketProvider>
+          <RemoteUserProvider>{children}</RemoteUserProvider>
+        </SocketProvider>
+      </body>
     </html>
   );
 }
