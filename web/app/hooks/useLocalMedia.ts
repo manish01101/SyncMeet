@@ -21,7 +21,12 @@ export const useLocalMedia = (roomId: string, emailId: string | null) => {
         });
         currentStream = mediaStream;
         setStream(mediaStream);
-        if (videoRef.current) videoRef.current.srcObject = mediaStream;
+        if (videoRef.current) {
+          // Only set the srcObject if it isn't already set to this stream
+          if (videoRef.current.srcObject !== mediaStream) {
+            videoRef.current.srcObject = mediaStream;
+          }
+        }
       } catch (e: any) {
         console.error("Error getting media:", e);
         if (e.name === "NotAllowedError") {

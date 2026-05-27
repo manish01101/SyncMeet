@@ -109,11 +109,23 @@ const RemoteVideo = ({
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-      videoRef.current
-        .play()
-        .catch((e) => console.error("Video play error:", e));
+    const videoEl = videoRef.current;
+    if (!videoEl || !stream) return;
+
+    // Prevent the "new load request" by only setting the stream if it changed
+    if (videoEl.srcObject !== stream) {
+      videoEl.srcObject = stream;
+    }
+
+    // rely on the `autoPlay` attribute on the <video> tag below.
+    // If a manual play is ever forced, we silently catch the harmless AbortError.
+    const playPromise = videoEl.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((error) => {
+        if (error.name !== "AbortError") {
+          console.error("Video play error:", error);
+        }
+      });
     }
   }, [stream]);
 
