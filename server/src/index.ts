@@ -28,7 +28,17 @@ interface SignalMessage {
 
 const app = express();
 
-app.use(cors({ origin: "*", methods: ["GET", "POST"] }));
+const allowedOrigins = process.env.WEB_URL
+  ? [process.env.WEB_URL, "http://localhost:3000"]
+  : "*";
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  }),
+);
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });

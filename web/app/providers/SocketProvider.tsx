@@ -3,11 +3,17 @@
 import React, { useEffect, useState, type PropsWithChildren } from "react";
 import { SocketContext } from "./SocketContext";
 
+const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+
 export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+    // Rapidly "ping" the server to wake it up if it's on Render Free Tier
+    fetch(wsUrl).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => console.log("Connected to WebSocket Server");
