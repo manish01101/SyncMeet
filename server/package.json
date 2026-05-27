@@ -4,10 +4,24 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsc -b && node dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "module",
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "latest",
+    "@types/node": "^25.9.1",
+    "@types/ws": "^8.18.1",
+    "cors": "^2.8.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "ws": "^8.21.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
 }
