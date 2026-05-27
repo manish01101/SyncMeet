@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Video,
   Shield,
@@ -300,6 +301,70 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* footer  */}
+      <footer className="bg-slate-50 border-t border-slate-200 pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-16">
+            {/* Brand Column */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-blue-600 p-1.5 rounded-lg">
+                  <Video size={18} className="text-white" />
+                </div>
+                <span className="font-bold text-xl tracking-tight text-slate-900">
+                  SyncMeet
+                </span>
+              </div>
+              <p className="text-slate-500 max-w-sm leading-relaxed">
+                Crystal clear, zero-friction video meetings built for modern
+                teams. Secure, fast, and straight from your browser.
+              </p>
+            </div>
+
+            {/* Links Columns */}
+            <div>
+              <h4 className="font-bold text-slate-900 mb-4">Product</h4>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li>
+                  <Link
+                    href="#features"
+                    className="hover:text-blue-600 transition"
+                  >
+                    Features
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#security"
+                    className="hover:text-blue-600 transition"
+                  >
+                    Security
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-slate-200 text-sm text-slate-500 gap-4">
+            <p>
+              &copy;{new Date().getFullYear()} SyncMeet All rights reserved.
+            </p>
+            <div className="flex items-center gap-6">
+              <Link href="#" className="hover:text-slate-900 transition">
+                Privacy Policy
+              </Link>
+              <Link href="#" className="hover:text-slate-900 transition">
+                Terms of Service
+              </Link>
+              <Link href="#" className="hover:text-slate-900 transition">
+                Cookie Settings
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
