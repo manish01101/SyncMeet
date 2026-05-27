@@ -1,5 +1,4 @@
 "use client";
-import "../../envConfig";
 
 import React, { useEffect, useState, type PropsWithChildren } from "react";
 import { SocketContext } from "./SocketContext";
@@ -8,19 +7,26 @@ export const SocketProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
   useEffect(() => {
-    // Only connects on the client side
-    const ws = new WebSocket(
-      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000",
-    );
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => console.log("Connected to WebSocket Server");
     ws.onclose = () => console.log("Disconnected from Server");
-    ws.onerror = (err) => console.error("WebSocket Error:", err);
+
+    // The browser hides WS error details. We log a custom message instead.
+    ws.onerror = () => {
+      console.error(
+        `WebSocket connection failed. Make sure your backend server is running at ${wsUrl}`,
+      );
+    };
 
     setSocket(ws);
 
     return () => {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (
+        ws.readyState === WebSocket.OPEN ||
+        ws.readyState === WebSocket.CONNECTING
+      ) {
         ws.close();
       }
     };

@@ -1,7 +1,5 @@
 "use client";
 
-import "../../envConfig";
-
 import React, {
   useCallback,
   useEffect,
