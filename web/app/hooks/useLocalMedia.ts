@@ -2,12 +2,17 @@
 
 import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import { SocketContext } from "../providers/SocketContext";
+import PeerContext from "../providers/PeerContext";
 
 export const useLocalMedia = (roomId: string, emailId: string | null) => {
   const { socket } = useContext(SocketContext);
+  const { replaceVideoTrack } = useContext(PeerContext);
+
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Initialize Media
@@ -95,5 +100,63 @@ export const useLocalMedia = (roomId: string, emailId: string | null) => {
     }
   }, [stream, isVideoOff, socket, roomId, emailId]);
 
-  return { stream, isMuted, isVideoOff, videoRef, toggleAudio, toggleVideo };
+  const toggleScreenShare = useCallback(async () => {
+    if (!isScreenSharing) {
+      try {
+        // Ask browser for screen stream
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({
+          video: { cursor: "always" } as any,
+          audio: false,
+        });
+
+        const screenTrack = screenStream.getVideoTracks()[0];
+
+        // Send screen track to all peers
+        await replaceVideoTrack(screenTrack);
+
+        // Show screen track in local self-view
+        if (videoRef.current) {
+          videoRef.current.srcObject = new MediaStream([screenTrack]);
+        }
+
+        setIsScreenSharing(true);
+
+        // Listen for the native browser "Stop Sharing" button
+        screenTrack.onended = () => {
+          stopScreenShare();
+        };
+      } catch (error) {
+        console.error("Error sharing screen:", error);
+      }
+    } else {
+      stopScreenShare();
+    }
+  }, [isScreenSharing, replaceVideoTrack, stream]);
+
+  const stopScreenShare = useCallback(async () => {
+    if (!stream) return;
+    const cameraTrack = stream.getVideoTracks()[0];
+
+    if (cameraTrack) {
+      // Send camera track back to peers
+      await replaceVideoTrack(cameraTrack);
+
+      // Show camera track in local self-view
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    }
+    setIsScreenSharing(false);
+  }, [stream, replaceVideoTrack]);
+
+  return {
+    stream,
+    isMuted,
+    isVideoOff,
+    isScreenSharing,
+    videoRef,
+    toggleAudio,
+    toggleVideo,
+    toggleScreenShare,
+  };
 };

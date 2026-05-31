@@ -165,6 +165,19 @@ export const PeerProvider: React.FC<React.PropsWithChildren> = ({
     [],
   );
 
+  // 7. Replace Video Track (For Screen Sharing)
+  const replaceVideoTrack = useCallback(async (newTrack: MediaStreamTrack) => {
+    peersRef.current.forEach((peer) => {
+      // Find the sender that is transmitting the video
+      const sender = peer.getSenders().find((s) => s.track?.kind === "video");
+      if (sender) {
+        sender
+          .replaceTrack(newTrack)
+          .catch((e) => console.error("Error replacing track", e));
+      }
+    });
+  }, []);
+
   useEffect(() => {
     return () => {
       peersRef.current.forEach((peer) => peer.close());
@@ -183,6 +196,7 @@ export const PeerProvider: React.FC<React.PropsWithChildren> = ({
         addIceCandidate,
         sendStream,
         removePeer,
+        replaceVideoTrack,
       }}
     >
       {children}

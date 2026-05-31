@@ -10,6 +10,7 @@ import {
   PhoneOff,
   Users,
   ShieldCheck,
+  MonitorUp,
 } from "lucide-react";
 import { useLocalMedia } from "@/app/hooks/useLocalMedia";
 import { useRoomSignaling } from "@/app/hooks/useRoomSignaling";
@@ -38,8 +39,10 @@ const RoomHeader = ({ roomId, participantCount, emailId }: any) => (
 const RoomControls = ({
   isMuted,
   isVideoOff,
+  isScreenSharing,
   onToggleAudio,
   onToggleVideo,
+  onToggleScreenShare,
   onLeave,
 }: any) => (
   <footer className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -66,6 +69,18 @@ const RoomControls = ({
         {isVideoOff ? <VideoOff size={20} /> : <Video size={20} />}
       </button>
 
+      {/* Screen Share Button */}
+      <button
+        onClick={onToggleScreenShare}
+        className={`h-12 w-12 flex items-center justify-center rounded-2xl transition-all ${
+          isScreenSharing
+            ? "bg-blue-500/20 text-blue-500 ring-2 ring-blue-500/50"
+            : "bg-slate-700/50 text-white hover:bg-slate-600"
+        }`}
+      >
+        <MonitorUp size={20} />
+      </button>
+      <div className="w-px h-8 bg-white/10 mx-2" />
       <button
         onClick={onLeave}
         className="h-12 px-6 flex items-center justify-center rounded-2xl bg-red-500 hover:bg-red-600 text-white transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/20"
@@ -215,8 +230,16 @@ export default function RoomClient() {
   const myEmailId = searchParams.get("emailId");
 
   // state managed by custom hooks
-  const { stream, isMuted, isVideoOff, videoRef, toggleAudio, toggleVideo } =
-    useLocalMedia(roomId, myEmailId);
+  const {
+    stream,
+    isMuted,
+    isVideoOff,
+    isScreenSharing,
+    videoRef,
+    toggleAudio,
+    toggleVideo,
+    toggleScreenShare,
+  } = useLocalMedia(roomId, myEmailId);
   const { remoteStreams, remoteMediaStates } = useRoomSignaling(
     roomId,
     myEmailId,
@@ -286,8 +309,10 @@ export default function RoomClient() {
       <RoomControls
         isMuted={isMuted}
         isVideoOff={isVideoOff}
+        isScreenSharing={isScreenSharing}
         onToggleAudio={toggleAudio}
         onToggleVideo={toggleVideo}
+        onToggleScreenShare={toggleScreenShare}
         onLeave={() => router.push("/")}
       />
     </div>

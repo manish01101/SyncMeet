@@ -23,6 +23,7 @@ export interface IPeerContext {
   ) => Promise<void>;
   sendStream: (remoteId: string, stream: MediaStream) => Promise<void>;
   removePeer: (remoteId: string) => void;
+  replaceVideoTrack: (track: MediaStreamTrack) => Promise<void>;
 }
 
 export const PeerContext = createContext<IPeerContext>({
@@ -33,6 +34,7 @@ export const PeerContext = createContext<IPeerContext>({
   addIceCandidate: async () => {},
   sendStream: async () => {},
   removePeer: () => {},
+  replaceVideoTrack: async () => {},
 });
 
 export default PeerContext;
