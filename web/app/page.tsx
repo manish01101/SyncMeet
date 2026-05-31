@@ -15,24 +15,38 @@ import {
 
 export default function Home() {
   const router = useRouter();
+
+  // Separated states for creating vs joining to prevent input conflicts
   const [email, setEmail] = useState("");
-  const [roomId, setRoomId] = useState("");
+  const [createRoomId, setCreateRoomId] = useState("");
+  const [joinRoomId, setJoinRoomId] = useState("");
+
+  // Custom helper to generate room id
+  const generateRandomRoomId = () => {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < 7; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  };
 
   const handleCreateRoom = useCallback(() => {
     if (!email) return alert("Please enter your email first.");
 
-    // Generate a random 7-character room code
-    const targetRoom =
-      roomId.trim() || Math.random().toString(36).substring(2, 9);
+    // Use custom room if provided, otherwise generate random lower-case alphabet string
+    const targetRoom = createRoomId.trim() || generateRandomRoomId();
     router.push(`/room/${targetRoom}?emailId=${encodeURIComponent(email)}`);
-  }, [router, email]);
+  }, [router, email, createRoomId]);
 
   const handleJoinRoom = useCallback(() => {
     if (!email) return alert("Please enter your email first.");
-    if (!roomId.trim()) return alert("Please enter a room code to join.");
+    if (!joinRoomId.trim()) return alert("Please enter a room code to join.");
 
-    router.push(`/room/${roomId.trim()}?emailId=${encodeURIComponent(email)}`);
-  }, [router, email, roomId]);
+    router.push(
+      `/room/${joinRoomId.trim()}?emailId=${encodeURIComponent(email)}`,
+    );
+  }, [router, email, joinRoomId]);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-blue-200 overflow-x-hidden">
@@ -55,8 +69,8 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <main className="min-h-[100svh] pt-24 pb-12 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 relative z-10">
-        {/* Left Column - Copy & Form */}
+      <main className="min-h-[100svh] pt-24 pb-12 px-6 lg:px-12 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 relative z-10">
+        {/* Left Column (2/3 Width) - Copy & Form */}
         <div className="w-full lg:w-2/3 space-y-6 lg:space-y-8 z-10 lg:pr-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium">
             <span className="relative flex h-2 w-2">
@@ -79,10 +93,10 @@ export default function Home() {
             secure, instant connection.
           </p>
 
-          {/* Action Card (Start or Join) */}
-          <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col gap-5 max-w-md w-full relative z-20">
+          {/* BEAUTIFUL FORM CARD */}
+          <div className="bg-white p-8 rounded-[2rem] shadow-2xl shadow-blue-900/5 border border-slate-100 flex flex-col gap-6 max-w-md w-full relative z-20">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5 ml-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Your Email
               </label>
               <input
@@ -91,51 +105,53 @@ export default function Home() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@email.com"
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder:text-slate-400"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-700 placeholder:text-slate-400 transition-all"
               />
             </div>
 
-            {/* Custom Room ID Input */}
+            {/* Create Room Section */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5 ml-1">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Room Code
               </label>
               <input
                 type="text"
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value)}
-                placeholder="Custom ID (optional)"
-                className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder:text-slate-400 font-mono transition-all uppercase"
+                value={createRoomId}
+                onChange={(e) => setCreateRoomId(e.target.value.toLowerCase())}
+                placeholder="custom id (optional)"
+                className="w-full px-4 py-3.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-slate-700 placeholder:text-slate-400 font-mono transition-all"
               />
             </div>
 
             <button
               onClick={handleCreateRoom}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-4 rounded-xl font-semibold text-[15px] transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 active:scale-[0.98]"
             >
               <Video size={18} />
               New Meeting
             </button>
 
-            <div className="flex items-center gap-3 mt-2">
-              <div className="h-px bg-slate-200 flex-1" />
-              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+            {/* Divider */}
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-slate-200"></div>
+              <span className="flex-shrink-0 mx-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
                 or join existing
               </span>
-              <div className="h-px bg-slate-200 flex-1" />
+              <div className="flex-grow border-t border-slate-200"></div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2">
+            {/* Join Room Section */}
+            <div className="flex gap-3">
               <input
                 type="text"
-                value={roomId}
-                onChange={(e) => setRoomId(e.target.value)}
-                placeholder="Enter room code"
-                className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none text-slate-700 placeholder:text-slate-400 font-mono uppercase"
+                value={joinRoomId}
+                onChange={(e) => setJoinRoomId(e.target.value.toLowerCase())}
+                placeholder="enter room code"
+                className="flex-1 px-4 py-3.5 rounded-xl bg-slate-50/50 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-slate-700 placeholder:text-slate-400 font-mono transition-all"
               />
               <button
                 onClick={handleJoinRoom}
-                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-semibold transition-all"
+                className="bg-slate-950 hover:bg-slate-800 text-white px-8 py-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-slate-900/20 active:scale-[0.98]"
               >
                 Join
               </button>
@@ -154,15 +170,15 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right Column - Animated UI Visualization */}
+        {/* Right Column (1/3 Width) - Animated UI Visualization */}
         <div className="w-full lg:w-1/3 relative hidden lg:block">
           {/* Abstract background glows */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-blue-500/10 to-emerald-500/10 blur-[120px] rounded-full z-0 pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] bg-gradient-to-tr from-blue-500/10 to-emerald-500/10 blur-[100px] rounded-full z-0 pointer-events-none" />
 
-          <div className="relative z-10 w-full aspect-square max-w-[500px] mx-auto">
+          <div className="relative z-10 w-full aspect-square max-w-[400px] mx-auto">
             {/* Center Node (You) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-blue-600 rounded-3xl shadow-[0_0_40px_rgba(37,99,235,0.4)] flex items-center justify-center z-20 animate-pulse border-4 border-white/10 backdrop-blur-xl">
-              <Video size={32} className="text-white" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-blue-600 rounded-3xl shadow-[0_0_40px_rgba(37,99,235,0.4)] flex items-center justify-center z-20 animate-pulse border-4 border-white/10 backdrop-blur-xl">
+              <Video size={28} className="text-white" />
             </div>
 
             {/* Orbiting Connection Rings */}
@@ -171,7 +187,7 @@ export default function Home() {
 
             {/* Floating Participant Nodes */}
             <div
-              className="absolute top-[10%] left-[20%] w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 animate-bounce"
+              className="absolute top-[5%] left-[10%] w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 animate-bounce"
               style={{ animationDelay: "0s", animationDuration: "3s" }}
             >
               <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">
@@ -180,7 +196,7 @@ export default function Home() {
             </div>
 
             <div
-              className="absolute top-[30%] right-[10%] w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 animate-bounce"
+              className="absolute top-[25%] right-[0%] w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 animate-bounce"
               style={{ animationDelay: "0.5s", animationDuration: "3.5s" }}
             >
               <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">
@@ -189,14 +205,14 @@ export default function Home() {
             </div>
 
             <div
-              className="absolute bottom-[20%] left-[15%] w-16 h-16 bg-slate-900 rounded-2xl shadow-xl flex items-center justify-center border border-slate-800 animate-bounce"
+              className="absolute bottom-[20%] left-[5%] w-14 h-14 bg-slate-900 rounded-2xl shadow-xl flex items-center justify-center border border-slate-800 animate-bounce"
               style={{ animationDelay: "1s", animationDuration: "4s" }}
             >
-              <MonitorUp size={24} className="text-blue-400" />
+              <MonitorUp size={20} className="text-blue-400" />
             </div>
 
             <div
-              className="absolute bottom-[10%] right-[25%] w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 animate-bounce"
+              className="absolute bottom-[5%] right-[15%] w-14 h-14 bg-white rounded-2xl shadow-xl flex items-center justify-center border border-slate-100 animate-bounce"
               style={{ animationDelay: "1.5s", animationDuration: "3.2s" }}
             >
               <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-sm">
@@ -209,8 +225,8 @@ export default function Home() {
               <line
                 x1="50%"
                 y1="50%"
-                x2="28%"
-                y2="18%"
+                x2="20%"
+                y2="15%"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeDasharray="4 4"
@@ -219,8 +235,8 @@ export default function Home() {
               <line
                 x1="50%"
                 y1="50%"
-                x2="82%"
-                y2="38%"
+                x2="90%"
+                y2="35%"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeDasharray="4 4"
@@ -229,8 +245,8 @@ export default function Home() {
               <line
                 x1="50%"
                 y1="50%"
-                x2="23%"
-                y2="72%"
+                x2="15%"
+                y2="70%"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeDasharray="4 4"
@@ -239,8 +255,8 @@ export default function Home() {
               <line
                 x1="50%"
                 y1="50%"
-                x2="67%"
-                y2="82%"
+                x2="75%"
+                y2="85%"
                 stroke="currentColor"
                 strokeWidth="2"
                 strokeDasharray="4 4"
