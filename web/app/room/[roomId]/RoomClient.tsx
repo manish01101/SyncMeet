@@ -77,27 +77,71 @@ const RoomControls = ({
   </footer>
 );
 
-const LocalVideo = ({ videoRef, isVideoOff, isMuted }: any) => (
-  <div className="absolute bottom-8 right-8 w-48 md:w-72 aspect-video rounded-2xl overflow-hidden border border-white/20 shadow-2xl z-30 group bg-gray-900">
-    <video
-      ref={videoRef}
-      autoPlay
-      muted
-      playsInline
-      className={`w-full h-full object-cover transform scale-x-[-1] transition-opacity duration-300 ${
-        isVideoOff ? "opacity-0" : "opacity-100"
-      }`}
-    />
-    {isVideoOff && (
-      <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
-        <VideoOff className="text-slate-500" size={32} />
+const LocalVideo = ({ videoRef, isVideoOff, isMuted }: any) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragRef = useRef({ startX: 0, startY: 0 });
+  const isDragging = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Handle the start of the drag (mouse down / touch start)
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    isDragging.current = true;
+    dragRef.current.startX = e.clientX - position.x;
+    dragRef.current.startY = e.clientY - position.y;
+
+    // Capture the pointer so dragging works even if the mouse moves outside the box fast
+    if (containerRef.current) {
+      containerRef.current.setPointerCapture(e.pointerId);
+    }
+  };
+
+  // handle movement
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDragging.current) return;
+
+    const newX = e.clientX - dragRef.current.startX;
+    const newY = e.clientY - dragRef.current.startY;
+    setPosition({ x: newX, y: newY });
+  };
+
+  // handle mouse up / touch end
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    isDragging.current = false;
+    if (containerRef.current) {
+      containerRef.current.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerUp}
+      style={{ transform: `translate3d(${position.x}px, ${position.y}px, 0)` }}
+      className="absolute bottom-8 right-8 w-32 md:w-64 aspect-video rounded-2xl overflow-hidden border border-white/20 shadow-2xl z-50 bg-black touch-none cursor-grab active:cursor-grabbing"
+    >
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        className={`w-full h-full object-contain transform scale-x-[-1] transition-opacity duration-300 pointer-events-none ${
+          isVideoOff ? "opacity-0" : "opacity-100"
+        }`}
+      />
+      {isVideoOff && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
+          <VideoOff className="text-slate-500" size={32} />
+        </div>
+      )}
+      <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-[10px] uppercase tracking-wider px-2 py-1 rounded text-white font-bold pointer-events-none">
+        You {isMuted && "• Muted"}
       </div>
-    )}
-    <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-[10px] uppercase tracking-wider px-2 py-1 rounded text-white font-bold">
-      You {isMuted && "• Muted"}
     </div>
-  </div>
-);
+  );
+};
 
 const RemoteVideo = ({
   email,
@@ -112,13 +156,10 @@ const RemoteVideo = ({
     const videoEl = videoRef.current;
     if (!videoEl || !stream) return;
 
-    // Prevent the "new load request" by only setting the stream if it changed
     if (videoEl.srcObject !== stream) {
       videoEl.srcObject = stream;
     }
 
-    // rely on the `autoPlay` attribute on the <video> tag below.
-    // If a manual play is ever forced, we silently catch the harmless AbortError.
     const playPromise = videoEl.play();
     if (playPromise !== undefined) {
       playPromise.catch((error) => {
@@ -131,7 +172,7 @@ const RemoteVideo = ({
 
   return (
     <div
-      className={`relative w-full h-full bg-gray-950 rounded-2xl overflow-hidden shadow-2xl border border-white/5 ${
+      className={`relative w-full h-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/5 ${
         isHero ? "ring-1 ring-blue-500/30" : ""
       }`}
     >
@@ -139,7 +180,7 @@ const RemoteVideo = ({
         ref={videoRef}
         autoPlay
         playsInline
-        className={`w-full h-full object-cover transition-opacity duration-300 ${
+        className={`w-full h-full object-contain transition-opacity duration-300 ${
           isVideoOff ? "opacity-0" : "opacity-100"
         }`}
       />
